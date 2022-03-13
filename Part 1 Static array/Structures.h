@@ -19,9 +19,9 @@ struct PersonInfo {
 };
 
 struct Date {
-	string day;
-	string month;
-	string year;
+	unsigned day;
+	unsigned month;
+	unsigned year;
 };
 
 struct CarInfo {
@@ -35,4 +35,11 @@ struct CarInfo {
 struct Table {
 	CarInfo infoList[maxTableSize] = {};
 	int tableSize = 0;
+};
+
+struct maxStrLens {
+	unsigned name = 0;
+	unsigned adress = 0;
+	unsigned model = 0;
+	unsigned color = 0;
 };
