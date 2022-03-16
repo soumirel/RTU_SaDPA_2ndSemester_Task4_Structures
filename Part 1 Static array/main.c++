@@ -3,17 +3,16 @@
 #include <string>
 #include <locale>
 #include <iomanip>
-#define NOMINMAX
 #include <windows.h>
 
 using namespace std;
 
-void printMenu(Table& table, maxStrLen& maxLen);
-void printTable(Table& table, maxStrLen& maxLen);
-CarInfo createInfo(CarInfo newInfo, maxStrLen& maxLen);
-void insertInfo(CarInfo info, Table& table);
-size_t deleteInfo(Table& table);
-void createSortedTable(Table& table, maxStrLen& maxLen);
+void printMenu(TechInspectTable& table, maxFieldsLen& maxLen);
+void printTable(TechInspectTable& table, maxFieldsLen& maxLen);
+TechInspectInfo createInfo(maxFieldsLen& maxLen);
+void insertInfo(TechInspectInfo info, TechInspectTable& table);
+size_t deleteInfo(TechInspectTable& table);
+TechInspectTable createFilteredTable(TechInspectTable& table);
 
 
 int main() {
@@ -22,14 +21,14 @@ int main() {
 	SetConsoleOutputCP(1251);
 
 	// Главные переменные
-	Table table{};
-	CarInfo tempInfo{};
+	TechInspectTable table{};
+	TechInspectTable filteredTable{};
 
 	//Вспомогательные переменные
 	size_t tempsize_t;
 
 	//Переменные для вывода
-	maxStrLen maxLen;
+	maxFieldsLen maxLen;
 
 	//Переменные для пользовательского ввода.
 	int userChoice = -1;
@@ -37,15 +36,18 @@ int main() {
 	while (userChoice != 0) { // Главный меню-цикл.
 		system("cls");
 		printMenu(table, maxLen);
+
 		cin >> userChoice;
 		cin.ignore();
+
 		switch (userChoice) {
 		case 1:
 			cout << "Выбрано занесение информации о техосмотре в таблицу\n";
-			insertInfo(createInfo(tempInfo, maxLen), table);
+			insertInfo(createInfo(maxLen), table);
 			cout << "Запись занесена в таблицу.\n";
 			system("pause");
 			break;
+
 		case 2:
 			cout << "Выбрано удаление по номеру автомобиля\n";
 			tempsize_t = deleteInfo(table);
@@ -55,19 +57,28 @@ int main() {
 			else {
 				cout << "Записей для удаления не было найдено\n";
 			}
-			cout;
 			system("pause");
 			break;
+
 		case 3:
 			cout << "Выбрано формирование таблицы по модели и цвету\n";
-			createSortedTable(table, maxLen);
+			filteredTable = createFilteredTable(table);
+			if (filteredTable.tableSize == 0) {
+				cout << "По запросу ничего не найдено :(\n";
+			}
+			else {
+				cout << "По запросу найдено:\n";
+				printTable(filteredTable, maxLen);
+			}
 			system("pause");
 			break;
+
 		case 0:
 			cout << "До свидания!\n";
 			userChoice = 0;
 			system("pause");
 			break;
+
 		default:
 			cout << "Я не понимаю вас, повторите ввод\n";
 			cin.clear();
@@ -78,12 +89,14 @@ int main() {
 	return 0;
 }
 
-void printMenu(Table& table, maxStrLen& maxLen) {
+void printMenu(TechInspectTable& table, maxFieldsLen& maxLen) {
 	cout << "Практическая работа #4 ИКБО-03-21 Мазанов А.Е. Вариант 17\n\n"
 		"Задание 4 - Структуры. Одномерный массив.\n"
 		"================Меню================\n"
 		"Таблица: ";
+
 	printTable(table, maxLen);
+
 	cout << endl;
 	cout << "Введите [1], чтобы внести информацию о тех.осмотре.\n"
 		"Введите [2], чтобы удалить сведения об автомобиле с заданным номером.\n"
@@ -93,7 +106,7 @@ void printMenu(Table& table, maxStrLen& maxLen) {
 }
 
 
-void printTable(Table& table, maxStrLen& maxLen) {
+void printTable(TechInspectTable& table, maxFieldsLen& maxLen) {
 	if (table.tableSize != 0) {
 		string tableHeader1 = "Рег.номер";
 		string tableHeader2 = "Модель";
@@ -172,28 +185,39 @@ void printTable(Table& table, maxStrLen& maxLen) {
 }
 
 
-CarInfo createInfo(CarInfo newInfo, maxStrLen& maxLen) {
+TechInspectInfo createInfo(maxFieldsLen& maxLen) {
+	TechInspectInfo newInfo{};
 
 	cout << "Введите код региона: ";
 	getline(cin, newInfo.carNumber.regionCode);
+
 	cout << "Введите цифры номера: ";
 	getline(cin, newInfo.carNumber.digits);
+
 	cout << "Введите буквы номера: ";
 	getline(cin, newInfo.carNumber.letters);
+
 	cout << "Введите модель автомобиля: ";
 	getline(cin, newInfo.model);
+
 	cout << "Введите цвет автомобиля: ";
 	getline(cin, newInfo.color);
+
 	cout << "Введите фамилию владельца: ";
 	getline(cin, newInfo.personInfo.surname);
+
 	cout << "Введите имя владельца: ";
 	getline(cin, newInfo.personInfo.name);
+
 	cout << "Введите адрес владельца: ";
 	getline(cin, newInfo.personInfo.adress);
+
 	cout << "Введите день осмотра: ";
 	cin >> newInfo.date.day;
+
 	cout << "Введите месяц осмотра: ";
 	cin >> newInfo.date.month;
+
 	cout << "Введите год осмотра: ";
 	cin >> newInfo.date.year;
 
@@ -209,7 +233,7 @@ CarInfo createInfo(CarInfo newInfo, maxStrLen& maxLen) {
 }
 
 
-void insertInfo(CarInfo info, Table& table) {
+void insertInfo(TechInspectInfo info, TechInspectTable& table) {
 	/*Если запись не первая - поиск позиции для вставки
 	в хронологическом порядке*/
 	if (table.tableSize != 0) {
@@ -236,15 +260,17 @@ void insertInfo(CarInfo info, Table& table) {
 		записи с младшей датой сдвигются вправо*/
 		else {
 			int i = 0;
-			while (table.infoList[i].date.year < info.date.year && i < table.tableSize) {
+			while (table.infoList[i].date.year < info.date.year && i < table.tableSize){
 				i++;
 			}
-			while (table.infoList[i].date.month < info.date.month && table.infoList[i].date.year == info.date.year &&
+			while (table.infoList[i].date.month < info.date.month &&
+				table.infoList[i].date.year == info.date.year &&
 				i < table.tableSize) {
 				i++;
 			}
 			while (table.infoList[i].date.day < info.date.day &&
-				table.infoList[i].date.month == info.date.month && table.infoList[i].date.year == info.date.year &&
+				table.infoList[i].date.month == info.date.month &&
+				table.infoList[i].date.year == info.date.year &&
 				i < table.tableSize) {
 				i++;
 			}
@@ -258,11 +284,12 @@ void insertInfo(CarInfo info, Table& table) {
 	else {
 		table.infoList[table.tableSize] = info;
 	}
+
 	table.tableSize++;
 }
 
 
-size_t deleteInfo(Table& table) {
+size_t deleteInfo(TechInspectTable& table) {
 	string rC, d, l;
 	cout << "Введите код региона: ";
 	getline(cin, rC);
@@ -275,7 +302,7 @@ size_t deleteInfo(Table& table) {
 		if (table.infoList[i].carNumber.regionCode == rC &&
 			table.infoList[i].carNumber.digits == d &&
 			table.infoList[i].carNumber.letters == l) {
-			for (size_t j = i; j < table.tableSize - 1; j--) {
+			for (size_t j = i; j < table.tableSize - 1; j++) {
 				table.infoList[j] = table.infoList[j + 1];
 			}
 			i--;
@@ -287,103 +314,20 @@ size_t deleteInfo(Table& table) {
 }
 
 
-void createSortedTable(Table& table, maxStrLen& maxLen) {
-	if (table.tableSize == 0) {
-		cout << "Ошибка! Таблица пуста.\n";
-	}
-	else {
-		string m, c;
-		cout << "Введите модель автомобиля: ";
-		getline(cin, m);
-		cout << "Введите цвет автомобиля: ";
-		getline(cin, c);
+TechInspectTable createFilteredTable(TechInspectTable& table) {
+	TechInspectTable filteredTable{};
+	string m, c;
+	cout << "Введите модель автомобиля: ";
+	getline(cin, m);
+	cout << "Введите цвет автомобиля: ";
+	getline(cin, c);
 
-		size_t indexesArr[100];
-		size_t indexesCounter = 0;
-		for (size_t i = 0; i < table.tableSize; i++) {
-			if (table.infoList[i].model == m &&
-				table.infoList[i].color == c) {
-				indexesArr[indexesCounter] = i;
-				indexesCounter++;
-			}
-		}
-		cout << "По введённым:\nМодель: " << m << "\nЦвет: " << c << endl;
-		if (indexesCounter) {
-			string tableHeader1 = "Рег.номер";
-			string tableHeader2 = "Модель";
-			string tableHeader3 = "Цвет";
-			string tableHeader4 = "Имя";
-			string tableHeader5 = "Адрес";
-			string tableHeader6 = "Дата";
-
-			maxLen.model = max(maxLen.model, tableHeader2.length());
-			maxLen.color = max(maxLen.color, tableHeader3.length());
-			maxLen.name = max(maxLen.name + 1, tableHeader4.length());
-			maxLen.adress = max(maxLen.adress, tableHeader5.length());
-
-			size_t tableHeaderLen = tableHeader1.length() + tableHeader2.length() +
-				tableHeader3.length() + tableHeader4.length() +
-				tableHeader5.length() + tableHeader6.length() + 5;
-			size_t horSepLen = tableHeaderLen + maxLen.adress + maxLen.name +
-				maxLen.color + maxLen.model + maxLen.year;
-			string VertSep = "|";
-
-			cout << "Найдено:\n";
-			cout << setw(horSepLen) << setfill('-') << "-" << endl;
-			cout << setfill(' ');
-			cout << VertSep << " " << left << tableHeader1 << "   ";
-			cout << VertSep << " " << setw(maxLen.model) << left << tableHeader2 << " ";
-			cout << VertSep << " " << setw(maxLen.color) << left << tableHeader3 << " ";
-			cout << VertSep << " " << setw(maxLen.name) << left << tableHeader4 << " ";
-			cout << VertSep << " " << setw(maxLen.adress) << left << tableHeader5 << " ";
-			cout << VertSep << " " << setw(maxLen.year + 6) << tableHeader6 << " " << VertSep << endl;
-			cout << setw(horSepLen) << setfill('-') << "-" << endl;
-			cout << setfill(' ');
-
-			size_t j;
-			for (size_t i = 0; i < indexesCounter; i++) {
-				j = indexesArr[i];
-
-				cout << VertSep << setw(13) << setfill(' ') << " ";
-				cout << VertSep << setw(maxLen.model + 2) << setfill(' ') << " ";
-				cout << VertSep << setw(maxLen.color + 2) << setfill(' ') << " ";
-				cout << VertSep << setw(maxLen.name + 2) << setfill(' ') << " ";
-				cout << VertSep << setw(maxLen.adress + 2) << setfill(' ') << " ";
-				cout << VertSep << setw(maxLen.year + 8) << setfill(' ') << " " << VertSep;
-				cout << endl;
-
-				cout << VertSep << " " << setw(3) << right << table.infoList[j].carNumber.regionCode << " ";
-
-				cout << table.infoList[j].carNumber.digits << " "
-					<< table.infoList[j].carNumber.letters << " ";
-
-				cout << VertSep << " " << setw(maxLen.model) << left << table.infoList[j].model << " ";
-
-				cout << VertSep << " " << setw(maxLen.color) << left << table.infoList[j].color << " ";
-
-				cout << VertSep << " " << setw(maxLen.name) << table.infoList[j].personInfo.surname
-					+ " " + table.infoList[j].personInfo.name << " ";
-
-				cout << VertSep << " " << setw(maxLen.adress) << table.infoList[j].personInfo.adress << " ";
-
-				cout << VertSep << " " << table.infoList[j].date.day / 10 << table.infoList[j].date.day % 10 << "."
-					<< table.infoList[j].date.month / 10 << table.infoList[j].date.month % 10 << "."
-					<< setw(maxLen.year) << left << table.infoList[j].date.year << " " << VertSep << endl;
-
-				cout << VertSep << setw(13) << setfill(' ') << " ";
-				cout << VertSep << setw(maxLen.model + 2) << setfill(' ') << " ";
-				cout << VertSep << setw(maxLen.color + 2) << setfill(' ') << " ";
-				cout << VertSep << setw(maxLen.name + 2) << setfill(' ') << " ";
-				cout << VertSep << setw(maxLen.adress + 2) << setfill(' ') << " ";
-				cout << VertSep << setw(maxLen.year + 8) << setfill(' ') << " " << VertSep;
-				cout << endl;
-
-				cout << setw(horSepLen) << setfill('-') << "-" << endl;
-				cout << setfill(' ');
-			}
-		}
-		else {
-			cout << "Ничего не найдено :(\n";
+	for (size_t i = 0; i < table.tableSize; i++) {
+		if (table.infoList[i].model == m &&
+			table.infoList[i].color == c) {
+			filteredTable.infoList[filteredTable.tableSize] = table.infoList[i];
+			filteredTable.tableSize++;
 		}
 	}
+	return filteredTable;
 }			

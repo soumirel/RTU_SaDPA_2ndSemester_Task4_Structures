@@ -18,12 +18,12 @@ struct PersonInfo {
 };
 
 struct Date {
-	unsigned day;
-	unsigned month;
+	size_t day;
+	size_t month;
 	size_t year;
 };
 
-struct CarInfo {
+struct TechInspectInfo {
 	CarNumber carNumber;
 	string model;
 	string color;
@@ -31,12 +31,12 @@ struct CarInfo {
 	Date date;
 };
 
-struct Table {
-	CarInfo infoList[maxTableSize] = {};
+struct TechInspectTable {
+	TechInspectInfo infoList[maxTableSize] = {};
 	int tableSize = 0;
 };
 
-struct maxStrLen {
+struct maxFieldsLen {
 	size_t name = 0;
 	size_t adress = 0;
 	size_t model = 0;
