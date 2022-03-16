@@ -1,73 +1,68 @@
-/*Учет техосмотра автомобилей.Структура записи об автомобиле : 
-Номер(код региона, цифровой код, буквенный код), 
-Модель, Цвет, Сведения о владельце(Фамилия, Имя, Адрес), 
-дата последнего техосмотра.
-1)	Заполнение записи по одному автомобилю с клавиатуры.
-2)	Вставить запись по автомобилю в таблицу, так, чтобы сохранялась упорядоченность по возрастанию по дате техосмотра.
-3)	Удалить сведения об автомобиле с заданным номером.
-4)	Сформировать список автомобилей заданной модели и заданного цвета. */
-
-
 #include "Structures.h"
 #include <iostream>
 #include <string>
-#include <clocale>
+#include <locale>
 #include <iomanip>
+#define NOMINMAX
+#include <windows.h>
 
 using namespace std;
-void printMenu(Table& table, maxStrLens& maxLens, bool& isCreated);
-void printTable(Table& table, maxStrLens& maxLens, bool& isCreated);
-CarInfo createInfo(CarInfo newInfo, maxStrLens& maxLens);
+
+void printMenu(Table& table, maxStrLen& maxLen);
+void printTable(Table& table, maxStrLen& maxLen);
+CarInfo createInfo(CarInfo newInfo, maxStrLen& maxLen);
 void insertInfo(CarInfo info, Table& table);
-unsigned deleteInfo(Table& table);
-void createSortedTable(Table& table, maxStrLens& maxLens, bool& isCreated);
+size_t deleteInfo(Table& table);
+void createSortedTable(Table& table, maxStrLen& maxLen);
 
 
 int main() {
 	setlocale(LC_ALL, "Russian");
+	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
 
 	// Главные переменные
 	Table table{};
 	CarInfo tempInfo{};
-	bool isTableCreated = false;
 
 	//Вспомогательные переменные
-	unsigned tempUnsigned;
+	size_t tempsize_t;
 
 	//Переменные для вывода
-	maxStrLens maxLens;
+	maxStrLen maxLen;
 
 	//Переменные для пользовательского ввода.
 	int userChoice = -1;
 
 	while (userChoice != 0) { // Главный меню-цикл.
 		system("cls");
-		printMenu(table, maxLens, isTableCreated);
+		printMenu(table, maxLen);
 		cin >> userChoice;
 		cin.ignore();
 		switch (userChoice) {
 		case 1:
 			cout << "Выбрано занесение информации о техосмотре в таблицу\n";
-			insertInfo(createInfo(tempInfo, maxLens), table);
+			insertInfo(createInfo(tempInfo, maxLen), table);
 			cout << "Запись занесена в таблицу.\n";
-			if (!isTableCreated) isTableCreated = true;
 			system("pause");
 			break;
 		case 2:
 			cout << "Выбрано удаление по номеру автомобиля\n";
-			tempUnsigned = deleteInfo(table);
-			if (tempUnsigned != 0) {
-				cout << "Удалено " << tempUnsigned << " строк\n";
+			tempsize_t = deleteInfo(table);
+			if (tempsize_t != 0) {
+				cout << "Удалено " << tempsize_t << " строк\n";
 			}
 			else {
-				cout << "Записей для удаления не было найдено";
+				cout << "Записей для удаления не было найдено\n";
 			}
 			cout;
 			system("pause");
 			break;
 		case 3:
 			cout << "Выбрано формирование таблицы по модели и цвету\n";
-			createSortedTable(table, maxLens, isTableCreated);
+			createSortedTable(table, maxLen);
+			system("pause");
+			break;
 		case 0:
 			cout << "До свидания!\n";
 			userChoice = 0;
@@ -83,12 +78,12 @@ int main() {
 	return 0;
 }
 
-void printMenu(Table& table, maxStrLens& maxLens, bool& isCreated) {
+void printMenu(Table& table, maxStrLen& maxLen) {
 	cout << "Практическая работа #4 ИКБО-03-21 Мазанов А.Е. Вариант 17\n\n"
 		"Задание 4 - Структуры. Одномерный массив.\n"
 		"================Меню================\n"
 		"Таблица: ";
-	printTable(table, maxLens, isCreated);
+	printTable(table, maxLen);
 	cout << endl;
 	cout << "Введите [1], чтобы внести информацию о тех.осмотре.\n"
 		"Введите [2], чтобы удалить сведения об автомобиле с заданным номером.\n"
@@ -98,90 +93,77 @@ void printMenu(Table& table, maxStrLens& maxLens, bool& isCreated) {
 }
 
 
-void printTable(Table& table, maxStrLens& maxLens, bool& isCreated) {
-	unsigned headerLen = 40 + maxLens.adress + maxLens.name +
-		maxLens.color + maxLens.model;
-	if (isCreated) {
+void printTable(Table& table, maxStrLen& maxLen) {
+	if (table.tableSize != 0) {
+		string tableHeader1 = "Рег.номер";
+		string tableHeader2 = "Модель";
+		string tableHeader3 = "Цвет";
+		string tableHeader4 = "Имя";
+		string tableHeader5 = "Адрес";
+		string tableHeader6 = "Дата";
+
+		maxLen.model = max(maxLen.model, tableHeader2.length());
+		maxLen.color = max(maxLen.color, tableHeader3.length());
+		maxLen.name = max(maxLen.name + 1, tableHeader4.length());
+		maxLen.adress = max(maxLen.adress, tableHeader5.length());
+
+		size_t tableHeaderLen = tableHeader1.length() + tableHeader2.length() +
+			tableHeader3.length() + tableHeader4.length() +
+			tableHeader5.length() + tableHeader6.length() + 5;
+		size_t horSepLen = tableHeaderLen + maxLen.adress + maxLen.name +
+			maxLen.color + maxLen.model + maxLen.year;
+		string VertSep = "|";
 
 		cout << endl;
+		cout << setw(horSepLen) << setfill('-') << "-" << endl;
+		cout << setfill(' ');
+		cout << VertSep << " " << left << tableHeader1 << "   ";
+		cout << VertSep << " " << setw(maxLen.model) << left << tableHeader2 << " ";
+		cout << VertSep << " " << setw(maxLen.color) << left << tableHeader3 << " ";
+		cout << VertSep << " " << setw(maxLen.name) << left << tableHeader4 << " ";
+		cout << VertSep << " " << setw(maxLen.adress) << left << tableHeader5 << " ";
+		cout << VertSep << " " << setw(maxLen.year + 6) << tableHeader6 << " " << VertSep << endl;
+		cout << setw(horSepLen) << setfill('-') << "-" << endl;
+		cout << setfill(' ');
 
-		for (unsigned i = 0; i < headerLen; i++) cout << "-";
-		cout << endl;
+		for (size_t i = 0; i < table.tableSize; i++){
 
-		cout << "| рег. номер  ";
-
-		cout << "| модель ";
-		for (unsigned i = 0; i < maxLens.model - 6 && maxLens.model > 6; i++){
-			cout << " ";
-		}
-
-		cout << "| цвет ";
-		for (unsigned i = 0; i < maxLens.color - 4 && maxLens.color > 4; i++) {
-			cout << " ";
-		}
-
-		cout << "| имя ";
-		for (unsigned i = 0; i < maxLens.color - 2 && maxLens.color > 2; i++) {
-			cout << " ";
-		}
-
-		cout << "| адрес ";
-		for (unsigned i = 0; i < maxLens.color - 5 && maxLens.color > 5; i++) {
-			cout << " ";
-		}
-
-		cout << "| дата      |" << endl;
-
-
-		string sep = "| ";
-		unsigned spaceCounter = 0;
-		for (unsigned i = 0; i < table.tableSize; i++){
-
-			cout << sep;
-			if (table.infoList[i].carNumber.regionCode.length() == 2) {
-				cout << " ";
-			}
-			cout << table.infoList[i].carNumber.regionCode << " "
-				<< table.infoList[i].carNumber.digits << " "
-				<< table.infoList[i].carNumber.letters << " ";
-
-			cout << sep
-			if (maxLens.model < 7) spaceCounter = table.infoList[i].model.length() - 7;
-			else spaceCounter = maxLens.model - table.infoList[i].model.length();
-			for (unsigned i = 0; i < spaceCounter; i++) {
-				cout << " ";
-			}
-
-			cout << sep
-				<< table.infoList[i].color;
-			spaceCounter = maxLens.color - table.infoList[i].color.length();
-			if (spaceCounter < 5) spaceCounter = 5;
-			for (unsigned i = 0; i < spaceCounter; i++) {
-				cout << " ";
-			}
-
-			cout << sep
-				<< table.infoList[i].personInfo.surname << " "
-				<< table.infoList[i].personInfo.name << " ";
-			spaceCounter = maxLens.name - table.infoList[i].personInfo.surname.length() - table.infoList[i].personInfo.name.length();
-			if (spaceCounter < 4) spaceCounter = 4;
-			for (unsigned i = 0; i < spaceCounter; i++) {
-				cout << " ";
-			}
-
-			cout << sep
-				<< table.infoList[i].personInfo.adress << " ";
-			spaceCounter = maxLens.adress - table.infoList[i].personInfo.adress.length();
-			if (spaceCounter < 6) spaceCounter = 6;
-			for (unsigned i = 0; i < spaceCounter; i++) {
-				cout << " ";
-			}
-
-			cout << sep
-				<< table.infoList[i].date.day << "."
-				<< table.infoList[i].date.month << "."
-				<< table.infoList[i].date.year << " |";
+			cout << VertSep << setw(13) << setfill(' ') << " ";
+			cout << VertSep << setw(maxLen.model + 2) << setfill(' ') << " ";
+			cout << VertSep << setw(maxLen.color + 2) << setfill(' ') << " ";
+			cout << VertSep << setw(maxLen.name + 2) << setfill(' ') << " ";
+			cout << VertSep << setw(maxLen.adress + 2) << setfill(' ') << " ";
+			cout << VertSep << setw(maxLen.year + 8) << setfill(' ') << " " << VertSep;
 			cout << endl;
+
+			cout << VertSep << " " << setw(3) << right << table.infoList[i].carNumber.regionCode << " ";
+
+			cout << table.infoList[i].carNumber.digits << " "
+				 << table.infoList[i].carNumber.letters << " ";
+
+			cout << VertSep << " " << setw(maxLen.model) << left << table.infoList[i].model << " ";
+
+			cout << VertSep << " " << setw(maxLen.color) << left << table.infoList[i].color << " ";
+
+			cout << VertSep << " " << setw(maxLen.name) << table.infoList[i].personInfo.surname
+				+ " " + table.infoList[i].personInfo.name << " ";
+
+			cout << VertSep << " " << setw(maxLen.adress) << table.infoList[i].personInfo.adress << " ";
+
+			cout << VertSep << " " << table.infoList[i].date.day / 10 << table.infoList[i].date.day % 10 << "."
+				 << table.infoList[i].date.month / 10 << table.infoList[i].date.month % 10 << "."
+				 << setw(maxLen.year) << left << table.infoList[i].date.year << " " << VertSep << endl;
+
+			cout << VertSep << setw(13) << setfill(' ') << " ";
+			cout << VertSep << setw(maxLen.model + 2) << setfill(' ') << " ";
+			cout << VertSep << setw(maxLen.color + 2) << setfill(' ') << " ";
+			cout << VertSep << setw(maxLen.name + 2) << setfill(' ') << " ";
+			cout << VertSep << setw(maxLen.adress + 2) << setfill(' ') << " ";
+			cout << VertSep << setw(maxLen.year + 8) << setfill(' ') << " " << VertSep;
+			cout << endl;
+
+			cout << setw(horSepLen) << setfill('-') << "-" << endl;
+			cout << setfill(' ');
 		}
 	}
 	else {
@@ -190,7 +172,7 @@ void printTable(Table& table, maxStrLens& maxLens, bool& isCreated) {
 }
 
 
-CarInfo createInfo(CarInfo newInfo, maxStrLens& maxLens) {
+CarInfo createInfo(CarInfo newInfo, maxStrLen& maxLen) {
 
 	cout << "Введите код региона: ";
 	getline(cin, newInfo.carNumber.regionCode);
@@ -209,33 +191,19 @@ CarInfo createInfo(CarInfo newInfo, maxStrLens& maxLens) {
 	cout << "Введите адрес владельца: ";
 	getline(cin, newInfo.personInfo.adress);
 	cout << "Введите день осмотра: ";
-	string tempStrDate;
-	getline(cin, tempStrDate);
-	newInfo.date.day = stoul(tempStrDate);
+	cin >> newInfo.date.day;
 	cout << "Введите месяц осмотра: ";
-	getline(cin, tempStrDate);
-	 newInfo.date.month = stoul(tempStrDate);
+	cin >> newInfo.date.month;
 	cout << "Введите год осмотра: ";
-	getline(cin, tempStrDate);
-	newInfo.date.year = stoul(tempStrDate);
-
+	cin >> newInfo.date.year;
 
 	/*Обновление максимальных длинн полей с нефикс. длинной*/
-	if (newInfo.model.length() > maxLens.model) {
-		maxLens.model = newInfo.model.length();
-	}
-	if (newInfo.color.length() > maxLens.color) {
-		maxLens.color = newInfo.color.length();
-	}
-	if (newInfo.personInfo.surname.length() +
-		newInfo.personInfo.name.length() > maxLens.name) {
-		maxLens.name = newInfo.personInfo.surname.length() +
-			newInfo.personInfo.name.length();
-	}
-	if (newInfo.personInfo.adress.length() >
-		maxLens.adress) {
-		maxLens.adress = newInfo.personInfo.adress.length();
-	}
+	maxLen.model = max(maxLen.model, newInfo.model.length());
+	maxLen.color = max(maxLen.color, newInfo.color.length());
+	maxLen.name = max(maxLen.name, newInfo.personInfo.surname.length() +
+		newInfo.personInfo.name.length());
+	maxLen.adress = max(maxLen.adress, newInfo.personInfo.adress.length());
+	maxLen.year = max(maxLen.year, (size_t)log10(newInfo.date.year) + 1);
 
 	return newInfo;
 }
@@ -252,7 +220,7 @@ void insertInfo(CarInfo info, Table& table) {
 		/*Если в таблице все записи младше новой*/
 		if (table.infoList[0].date.year > info.date.year) {
 			/*Сдвигаем всю таблицу вправо*/
-			for (unsigned i = table.tableSize - 1; i < 0; i--) {
+			for (int i = table.tableSize - 1; i >= 0; i--) {
 				table.infoList[i + 1] = table.infoList[i];
 			}
 			table.infoList[0] = info;
@@ -267,13 +235,22 @@ void insertInfo(CarInfo info, Table& table) {
 		так и со страшими . производится поиск, куда вставить новую запись, а
 		записи с младшей датой сдвигются вправо*/
 		else {
-			unsigned i = 0;
-			for (; table.infoList[i].date.year < info.date.year; i++)
-				for (; table.infoList[i].date.month < info.date.month; i++)
-					for (; table.infoList[i].date.day < info.date.day; i++)
-						for (unsigned j = table.tableSize - 1; j >= i; j--) {
-							table.infoList[j + 1] = table.infoList[j];
-						}
+			int i = 0;
+			while (table.infoList[i].date.year < info.date.year && i < table.tableSize) {
+				i++;
+			}
+			while (table.infoList[i].date.month < info.date.month && table.infoList[i].date.year == info.date.year &&
+				i < table.tableSize) {
+				i++;
+			}
+			while (table.infoList[i].date.day < info.date.day &&
+				table.infoList[i].date.month == info.date.month && table.infoList[i].date.year == info.date.year &&
+				i < table.tableSize) {
+				i++;
+			}
+			for (int j = table.tableSize - 1; j >= i; j--) {
+				table.infoList[j + 1] = table.infoList[j];
+			}
 			table.infoList[i] = info;
 		}
 	}
@@ -285,7 +262,7 @@ void insertInfo(CarInfo info, Table& table) {
 }
 
 
-unsigned deleteInfo(Table& table) {
+size_t deleteInfo(Table& table) {
 	string rC, d, l;
 	cout << "Введите код региона: ";
 	getline(cin, rC);
@@ -293,14 +270,15 @@ unsigned deleteInfo(Table& table) {
 	getline(cin, d);
 	cout << "Введите буквы номера: ";
 	getline(cin, l);
-	unsigned deletedCounter = 0;
-	for (unsigned i = 0; i < table.tableSize; i++){
+	size_t deletedCounter = 0;
+	for (size_t i = 0; i < table.tableSize; i++){
 		if (table.infoList[i].carNumber.regionCode == rC &&
 			table.infoList[i].carNumber.digits == d &&
 			table.infoList[i].carNumber.letters == l) {
-			for (unsigned j = i; j < table.tableSize - 1; j--) {
+			for (size_t j = i; j < table.tableSize - 1; j--) {
 				table.infoList[j] = table.infoList[j + 1];
 			}
+			i--;
 			table.tableSize--;
 			deletedCounter++;
 		}
@@ -309,8 +287,8 @@ unsigned deleteInfo(Table& table) {
 }
 
 
-void createSortedTable(Table& table, maxStrLens& maxLens, bool& isCreated) {
-	if (!isCreated) {
+void createSortedTable(Table& table, maxStrLen& maxLen) {
+	if (table.tableSize == 0) {
 		cout << "Ошибка! Таблица пуста.\n";
 	}
 	else {
@@ -320,98 +298,92 @@ void createSortedTable(Table& table, maxStrLens& maxLens, bool& isCreated) {
 		cout << "Введите цвет автомобиля: ";
 		getline(cin, c);
 
-		unsigned indexesArr[1000];
-		unsigned indexesCounter = 0;
-		for (unsigned i = 0; i < table.tableSize; i++) {
+		size_t indexesArr[100];
+		size_t indexesCounter = 0;
+		for (size_t i = 0; i < table.tableSize; i++) {
 			if (table.infoList[i].model == m &&
 				table.infoList[i].color == c) {
 				indexesArr[indexesCounter] = i;
 				indexesCounter++;
 			}
 		}
-
+		cout << "По введённым:\nМодель: " << m << "\nЦвет: " << c << endl;
 		if (indexesCounter) {
-			unsigned headerLen = 37 + maxLens.adress + maxLens.name +
-				maxLens.color + maxLens.model;
-			cout << endl;
+			string tableHeader1 = "Рег.номер";
+			string tableHeader2 = "Модель";
+			string tableHeader3 = "Цвет";
+			string tableHeader4 = "Имя";
+			string tableHeader5 = "Адрес";
+			string tableHeader6 = "Дата";
 
-			for (unsigned i = 0; i < headerLen; i++) cout << "-";
-			cout << endl;
+			maxLen.model = max(maxLen.model, tableHeader2.length());
+			maxLen.color = max(maxLen.color, tableHeader3.length());
+			maxLen.name = max(maxLen.name + 1, tableHeader4.length());
+			maxLen.adress = max(maxLen.adress, tableHeader5.length());
 
-			cout << "| рег. номер  ";
+			size_t tableHeaderLen = tableHeader1.length() + tableHeader2.length() +
+				tableHeader3.length() + tableHeader4.length() +
+				tableHeader5.length() + tableHeader6.length() + 5;
+			size_t horSepLen = tableHeaderLen + maxLen.adress + maxLen.name +
+				maxLen.color + maxLen.model + maxLen.year;
+			string VertSep = "|";
 
-			cout << "| модель ";
-			for (unsigned i = 0; i < maxLens.model - 7 && maxLens.model > 7; i++) {
-				cout << " ";
-			}
+			cout << "Найдено:\n";
+			cout << setw(horSepLen) << setfill('-') << "-" << endl;
+			cout << setfill(' ');
+			cout << VertSep << " " << left << tableHeader1 << "   ";
+			cout << VertSep << " " << setw(maxLen.model) << left << tableHeader2 << " ";
+			cout << VertSep << " " << setw(maxLen.color) << left << tableHeader3 << " ";
+			cout << VertSep << " " << setw(maxLen.name) << left << tableHeader4 << " ";
+			cout << VertSep << " " << setw(maxLen.adress) << left << tableHeader5 << " ";
+			cout << VertSep << " " << setw(maxLen.year + 6) << tableHeader6 << " " << VertSep << endl;
+			cout << setw(horSepLen) << setfill('-') << "-" << endl;
+			cout << setfill(' ');
 
-			cout << "| цвет ";
-			for (unsigned i = 0; i < maxLens.color - 5 && maxLens.color > 5; i++) {
-				cout << " ";
-			}
+			size_t j;
+			for (size_t i = 0; i < indexesCounter; i++) {
+				j = indexesArr[i];
 
-			cout << "| имя ";
-			for (unsigned i = 0; i < maxLens.color - 4 && maxLens.color > 4; i++) {
-				cout << " ";
-			}
+				cout << VertSep << setw(13) << setfill(' ') << " ";
+				cout << VertSep << setw(maxLen.model + 2) << setfill(' ') << " ";
+				cout << VertSep << setw(maxLen.color + 2) << setfill(' ') << " ";
+				cout << VertSep << setw(maxLen.name + 2) << setfill(' ') << " ";
+				cout << VertSep << setw(maxLen.adress + 2) << setfill(' ') << " ";
+				cout << VertSep << setw(maxLen.year + 8) << setfill(' ') << " " << VertSep;
+				cout << endl;
 
-			cout << "| адрес ";
-			for (unsigned i = 0; i < maxLens.color - 6 && maxLens.color > 6; i++) {
-				cout << " ";
-			}
+				cout << VertSep << " " << setw(3) << right << table.infoList[j].carNumber.regionCode << " ";
 
-			cout << "| дата      |";
+				cout << table.infoList[j].carNumber.digits << " "
+					<< table.infoList[j].carNumber.letters << " ";
 
+				cout << VertSep << " " << setw(maxLen.model) << left << table.infoList[j].model << " ";
 
-			string sep = "| ";
-			for (auto &i : indexesArr) {
+				cout << VertSep << " " << setw(maxLen.color) << left << table.infoList[j].color << " ";
 
-				cout << sep
-					<< table.infoList[i].carNumber.regionCode
-					<< table.infoList[i].carNumber.digits
-					<< table.infoList[i].carNumber.letters << " ";
+				cout << VertSep << " " << setw(maxLen.name) << table.infoList[j].personInfo.surname
+					+ " " + table.infoList[j].personInfo.name << " ";
 
-				cout << sep
-					<< table.infoList[i].model;
-				for (unsigned i = 0;
-					i < maxLens.model - table.infoList[i].model.length()
-					&& maxLens.model > table.infoList[i].model.length(); i++) {
-					cout << " ";
-				}
+				cout << VertSep << " " << setw(maxLen.adress) << table.infoList[j].personInfo.adress << " ";
 
-				cout << sep
-					<< table.infoList[i].color;
-				for (unsigned i = 0;
-					i < maxLens.color - table.infoList[i].color.length()
-					&& maxLens.color > table.infoList[i].color.length(); i++) {
-					cout << " ";
-				}
+				cout << VertSep << " " << table.infoList[j].date.day / 10 << table.infoList[j].date.day % 10 << "."
+					<< table.infoList[j].date.month / 10 << table.infoList[j].date.month % 10 << "."
+					<< setw(maxLen.year) << left << table.infoList[j].date.year << " " << VertSep << endl;
 
-				cout << sep
-					<< table.infoList[i].personInfo.surname << " "
-					<< table.infoList[i].personInfo.name << " ";
-				for (unsigned i = 0;
-					i < maxLens.name - table.infoList[i].personInfo.surname.length() - table.infoList[i].personInfo.name.length()
-					&& maxLens.name > table.infoList[i].personInfo.name.length() + table.infoList[i].personInfo.name.length(); i++) {
-					cout << " ";
-				}
+				cout << VertSep << setw(13) << setfill(' ') << " ";
+				cout << VertSep << setw(maxLen.model + 2) << setfill(' ') << " ";
+				cout << VertSep << setw(maxLen.color + 2) << setfill(' ') << " ";
+				cout << VertSep << setw(maxLen.name + 2) << setfill(' ') << " ";
+				cout << VertSep << setw(maxLen.adress + 2) << setfill(' ') << " ";
+				cout << VertSep << setw(maxLen.year + 8) << setfill(' ') << " " << VertSep;
+				cout << endl;
 
-				cout << sep
-					<< table.infoList[i].personInfo.adress << " ";
-				for (unsigned i = 0;
-					i < maxLens.adress - table.infoList[i].personInfo.adress.length()
-					&& maxLens.adress > table.infoList[i].personInfo.adress.length(); i++) {
-					cout << " ";
-				}
-
-				cout << sep
-					<< table.infoList[i].date.day << "."
-					<< table.infoList[i].date.month << "."
-					<< table.infoList[i].date.year << " |";
+				cout << setw(horSepLen) << setfill('-') << "-" << endl;
+				cout << setfill(' ');
 			}
 		}
 		else {
-			cout << "По запросу ничего не найдено :(\n";
+			cout << "Ничего не найдено :(\n";
 		}
 	}
-}
+}			

@@ -1,10 +1,9 @@
 #pragma once
-
-const int maxTableSize = 100;
-
 #include <string>
 
 using namespace std;
+
+const size_t maxTableSize = 100;
 
 struct CarNumber {
 	string regionCode;
@@ -21,7 +20,7 @@ struct PersonInfo {
 struct Date {
 	unsigned day;
 	unsigned month;
-	unsigned year;
+	size_t year;
 };
 
 struct CarInfo {
@@ -37,9 +36,10 @@ struct Table {
 	int tableSize = 0;
 };
 
-struct maxStrLens {
-	unsigned name = 0;
-	unsigned adress = 0;
-	unsigned model = 0;
-	unsigned color = 0;
+struct maxStrLen {
+	size_t name = 0;
+	size_t adress = 0;
+	size_t model = 0;
+	size_t color = 0;
+	size_t year = 0;
 };
