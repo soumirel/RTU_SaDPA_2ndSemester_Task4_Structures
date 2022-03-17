@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{911e9a66-0905-4c20-89f6-9cb1e407656d}</ProjectGuid>
-    <RootNamespace>Part1Staticarray</RootNamespace>
+    <ProjectGuid>{fd9c2809-1e12-4e9e-8c9f-53cbf178aeea}</ProjectGuid>
+    <RootNamespace>Part2Dynamicarray</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -139,7 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="part1_main.c++" />
+    <ClCompile Include="part2_main.c++" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Structures.h" />

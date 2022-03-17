@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="part1_main.c++">
+    <ClCompile Include="part2_main.c++">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
