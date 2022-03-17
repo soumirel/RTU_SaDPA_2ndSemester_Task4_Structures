@@ -89,6 +89,8 @@ int main() {
 	return 0;
 }
 
+
+//Функция вывода меню
 void printMenu(TechInspectTable& table, maxFieldsLen& maxLen) {
 	cout << "Практическая работа #4 ИКБО-03-21 Мазанов А.Е. Вариант 17\n\n"
 		"Задание 4 - Структуры. Одномерный массив.\n"
@@ -106,8 +108,10 @@ void printMenu(TechInspectTable& table, maxFieldsLen& maxLen) {
 }
 
 
+//Функция вывода таблицы
 void printTable(TechInspectTable& table, maxFieldsLen& maxLen) {
 	if (table.tableSize != 0) {
+		//Строковые заголовки таблицы
 		string tableHeader1 = "Рег.номер";
 		string tableHeader2 = "Модель";
 		string tableHeader3 = "Цвет";
@@ -115,11 +119,13 @@ void printTable(TechInspectTable& table, maxFieldsLen& maxLen) {
 		string tableHeader5 = "Адрес";
 		string tableHeader6 = "Дата";
 
+		//Обновление макс.длин с учётом длинны заголовочных строк
 		maxLen.model = max(maxLen.model, tableHeader2.length());
 		maxLen.color = max(maxLen.color, tableHeader3.length());
 		maxLen.name = max(maxLen.name + 1, tableHeader4.length());
 		maxLen.adress = max(maxLen.adress, tableHeader5.length());
 
+		//Переменные для вывода таблицы
 		size_t tableHeaderLen = tableHeader1.length() + tableHeader2.length() +
 			tableHeader3.length() + tableHeader4.length() +
 			tableHeader5.length() + tableHeader6.length() + 5;
@@ -127,6 +133,7 @@ void printTable(TechInspectTable& table, maxFieldsLen& maxLen) {
 			maxLen.color + maxLen.model + maxLen.year;
 		string VertSep = "|";
 
+		//Вывод заголовка
 		cout << endl;
 		cout << setw(horSepLen) << setfill('-') << "-" << endl;
 		cout << setfill(' ');
@@ -139,8 +146,10 @@ void printTable(TechInspectTable& table, maxFieldsLen& maxLen) {
 		cout << setw(horSepLen) << setfill('-') << "-" << endl;
 		cout << setfill(' ');
 
+		//Вывод инф.части таблицы
 		for (size_t i = 0; i < table.tableSize; i++){
 
+			//Вывод пустого поля сверху строчки
 			cout << VertSep << setw(13) << setfill(' ') << " ";
 			cout << VertSep << setw(maxLen.model + 2) << setfill(' ') << " ";
 			cout << VertSep << setw(maxLen.color + 2) << setfill(' ') << " ";
@@ -149,6 +158,7 @@ void printTable(TechInspectTable& table, maxFieldsLen& maxLen) {
 			cout << VertSep << setw(maxLen.year + 8) << setfill(' ') << " " << VertSep;
 			cout << endl;
 
+			//Строчка с информацией
 			cout << VertSep << " " << setw(3) << right << table.infoList[i].carNumber.regionCode << " ";
 
 			cout << table.infoList[i].carNumber.digits << " "
@@ -167,6 +177,7 @@ void printTable(TechInspectTable& table, maxFieldsLen& maxLen) {
 				 << table.infoList[i].date.month / 10 << table.infoList[i].date.month % 10 << "."
 				 << setw(maxLen.year) << left << table.infoList[i].date.year << " " << VertSep << endl;
 
+			//Вывод пустого поля снизу строчки
 			cout << VertSep << setw(13) << setfill(' ') << " ";
 			cout << VertSep << setw(maxLen.model + 2) << setfill(' ') << " ";
 			cout << VertSep << setw(maxLen.color + 2) << setfill(' ') << " ";
@@ -185,6 +196,7 @@ void printTable(TechInspectTable& table, maxFieldsLen& maxLen) {
 }
 
 
+//Функция создания строки для таблицы через ввод с клавиатуры
 TechInspectInfo createInfo(maxFieldsLen& maxLen) {
 	TechInspectInfo newInfo{};
 
@@ -233,6 +245,7 @@ TechInspectInfo createInfo(maxFieldsLen& maxLen) {
 }
 
 
+//Функция вставки строки в таблицу с сортировкой по дате
 void insertInfo(TechInspectInfo info, TechInspectTable& table) {
 	/*Если запись не первая - поиск позиции для вставки
 	в хронологическом порядке*/
@@ -259,6 +272,7 @@ void insertInfo(TechInspectInfo info, TechInspectTable& table) {
 		так и со страшими . производится поиск, куда вставить новую запись, а
 		записи с младшей датой сдвигются вправо*/
 		else {
+			//Поиск индекса для хронологической вставки
 			int i = 0;
 			while (table.infoList[i].date.year < info.date.year && i < table.tableSize){
 				i++;
@@ -289,6 +303,8 @@ void insertInfo(TechInspectInfo info, TechInspectTable& table) {
 }
 
 
+/*Функция удаления строк по заданным критериям
+возвращает кол-во удалённых элементов*/
 size_t deleteInfo(TechInspectTable& table) {
 	string rC, d, l;
 	cout << "Введите код региона: ";
@@ -302,6 +318,8 @@ size_t deleteInfo(TechInspectTable& table) {
 		if (table.infoList[i].carNumber.regionCode == rC &&
 			table.infoList[i].carNumber.digits == d &&
 			table.infoList[i].carNumber.letters == l) {
+			/*Сдвиг таблицы влево, чтобы часть сдвинутой таблцы
+			перекрывала элемент, который необходимо удалить*/
 			for (size_t j = i; j < table.tableSize - 1; j++) {
 				table.infoList[j] = table.infoList[j + 1];
 			}
@@ -314,6 +332,7 @@ size_t deleteInfo(TechInspectTable& table) {
 }
 
 
+//Функция создания отфильтрованной таблицы из исходной
 TechInspectTable createFilteredTable(TechInspectTable& table) {
 	TechInspectTable filteredTable{};
 	string m, c;
