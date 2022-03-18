@@ -1,4 +1,4 @@
-#include "Structures.h"
+#include "Part1_Structures.h"
 #include <iostream>
 #include <string>
 #include <locale>
@@ -254,7 +254,7 @@ void insertInfo(TechInspectInfo info, TechInspectTable& table) {
 		/*ѕринимаем то, что таблица отсортирована по датам,
 		а таблица из одного элемента €вл€етс€ отсортированной*/
 
-		/*≈сли в таблице все записи младше новой*/
+		/*≈сли в таблице все записи младше новой - вставл€ем в начало*/
 		if (table.infoList[0].date.year > info.date.year) {
 			/*—двигаем всю таблицу вправо*/
 			for (int i = table.tableSize - 1; i >= 0; i--) {
@@ -263,7 +263,7 @@ void insertInfo(TechInspectInfo info, TechInspectTable& table) {
 			table.infoList[0] = info;
 		}
 
-		/*≈сли в таблице все записи старше новой*/
+		/*≈сли в таблице все записи старше новой - вставл€ем в конец*/
 		else if (table.infoList[table.tableSize - 1].date.year < info.date.year) {
 			table.infoList[table.tableSize] = info;
 		}
@@ -288,6 +288,8 @@ void insertInfo(TechInspectInfo info, TechInspectTable& table) {
 				i < table.tableSize) {
 				i++;
 			}
+			/*—двигаем нужную часть таблицы
+			дл€ освобождени€ места дл€ нового элемента*/
 			for (int j = table.tableSize - 1; j >= i; j--) {
 				table.infoList[j + 1] = table.infoList[j];
 			}
@@ -298,7 +300,6 @@ void insertInfo(TechInspectInfo info, TechInspectTable& table) {
 	else {
 		table.infoList[table.tableSize] = info;
 	}
-
 	table.tableSize++;
 }
 

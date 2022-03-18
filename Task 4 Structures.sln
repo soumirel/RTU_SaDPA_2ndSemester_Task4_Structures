@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Part 1 Static array", "Part
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Part 2 Dynamic array", "Part 2 Dynamic array\Part 2 Dynamic array.vcxproj", "{FD9C2809-1E12-4E9E-8C9F-53CBF178AEEA}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Part 3 Vector", "Part 3 Vector\Part 3 Vector.vcxproj", "{DE8E7237-2D71-4CA5-B781-C8E217E7123C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +33,14 @@ Global
 		{FD9C2809-1E12-4E9E-8C9F-53CBF178AEEA}.Release|x64.Build.0 = Release|x64
 		{FD9C2809-1E12-4E9E-8C9F-53CBF178AEEA}.Release|x86.ActiveCfg = Release|Win32
 		{FD9C2809-1E12-4E9E-8C9F-53CBF178AEEA}.Release|x86.Build.0 = Release|Win32
+		{DE8E7237-2D71-4CA5-B781-C8E217E7123C}.Debug|x64.ActiveCfg = Debug|x64
+		{DE8E7237-2D71-4CA5-B781-C8E217E7123C}.Debug|x64.Build.0 = Debug|x64
+		{DE8E7237-2D71-4CA5-B781-C8E217E7123C}.Debug|x86.ActiveCfg = Debug|Win32
+		{DE8E7237-2D71-4CA5-B781-C8E217E7123C}.Debug|x86.Build.0 = Debug|Win32
+		{DE8E7237-2D71-4CA5-B781-C8E217E7123C}.Release|x64.ActiveCfg = Release|x64
+		{DE8E7237-2D71-4CA5-B781-C8E217E7123C}.Release|x64.Build.0 = Release|x64
+		{DE8E7237-2D71-4CA5-B781-C8E217E7123C}.Release|x86.ActiveCfg = Release|Win32
+		{DE8E7237-2D71-4CA5-B781-C8E217E7123C}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

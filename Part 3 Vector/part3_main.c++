@@ -1,4 +1,4 @@
-#include "Part2_Structures.h"
+#include "Part3_Structures.h"
 #include <iostream>
 #include <string>
 #include <locale>
@@ -13,7 +13,6 @@ TechInspectInfo createInfo(maxFieldsLen& maxLen);
 void insertInfo(TechInspectInfo info, TechInspectTable& table);
 size_t deleteInfo(TechInspectTable& table);
 TechInspectTable createFilteredTable(TechInspectTable& table);
-void resizeDynamicTable(TechInspectTable& table, int chaingingValue);
 
 
 int main() {
@@ -64,7 +63,7 @@ int main() {
 		case 3:
 			cout << "Выбрано формирование таблицы по модели и цвету\n";
 			filteredTable = createFilteredTable(table);
-			if (filteredTable.tableSize == 0) {
+			if (filteredTable.infoList.size() == 0) {
 				cout << "По запросу ничего не найдено :(\n";
 			}
 			else {
@@ -94,7 +93,7 @@ int main() {
 //Функция вывода меню
 void printMenu(TechInspectTable& table, maxFieldsLen& maxLen) {
 	cout << "Практическая работа #4 ИКБО-03-21 Мазанов А.Е. Вариант 17\n\n"
-		"Задание 4 - Структуры. Одномерный массив с динамическим управлением.\n"
+		"Задание 4 - Структуры. Одномерный массив.\n"
 		"================Меню================\n"
 		"Таблица: ";
 
@@ -111,7 +110,7 @@ void printMenu(TechInspectTable& table, maxFieldsLen& maxLen) {
 
 //Функция вывода таблицы
 void printTable(TechInspectTable& table, maxFieldsLen& maxLen) {
-	if (table.tableSize != 0) {
+	if (table.infoList.size() != 0) {
 		//Строковые заголовки таблицы
 		string tableHeader1 = "Рег.номер";
 		string tableHeader2 = "Модель";
@@ -148,7 +147,7 @@ void printTable(TechInspectTable& table, maxFieldsLen& maxLen) {
 		cout << setfill(' ');
 
 		//Вывод инф.части таблицы
-		for (size_t i = 0; i < table.tableSize; i++) {
+		for (size_t i = 0; i < table.infoList.size(); i++) {
 
 			//Вывод пустого поля сверху строчки
 			cout << VertSep << setw(13) << setfill(' ') << " ";
@@ -248,62 +247,50 @@ TechInspectInfo createInfo(maxFieldsLen& maxLen) {
 
 //Функция вставки строки в таблицу с сортировкой по дате
 void insertInfo(TechInspectInfo info, TechInspectTable& table) {
-	resizeDynamicTable(table, 1);
 	/*Если запись не первая - поиск позиции для вставки
 	в хронологическом порядке*/
-	if (table.tableSize != 0) {
+	if (table.infoList.size() != 0) {
 
 		/*Принимаем то, что таблица отсортирована по датам,
 		а таблица из одного элемента является отсортированной*/
 
 		/*Если в таблице все записи младше новой - вставляем в начало*/
 		if (table.infoList[0].date.year > info.date.year) {
-			/*Сдвигаем всю таблицу вправо*/
-			for (int i = table.tableSize - 1; i >= 0; i--) {
-				table.infoList[i + 1] = table.infoList[i];
-			}
-			table.infoList[0] = info;
+			table.infoList.insert(table.infoList.begin(), info);
 		}
 
 		/*Если в таблице все записи старше новой -
 		вставка новой записи в конец таблицы*/
-		else if (table.infoList[table.tableSize - 1].date.year < info.date.year) {
-			table.infoList[table.tableSize] = info;
+		else if (table.infoList[table.infoList.size() - 1].date.year < info.date.year) {
+			table.infoList.push_back(info);
 		}
 
 		/*Если дошли до else - в таблице есть записи как с младшими датами,
-		так и со страшими . производится поиск, куда вставить новую запись, а
-		записи с младшей датой сдвигются вправо*/
+		так и со страшими . производится поиск, куда вставить новую запись*/
 		else {
 			//Поиск индекса для хронологической вставки
 			int i = 0;
-			while (table.infoList[i].date.year < info.date.year && i < table.tableSize) {
+			while (table.infoList[i].date.year < info.date.year && i < table.infoList.size()) {
 				i++;
 			}
 			while (table.infoList[i].date.month < info.date.month &&
 				table.infoList[i].date.year == info.date.year &&
-				i < table.tableSize) {
+				i < table.infoList.size()) {
 				i++;
 			}
 			while (table.infoList[i].date.day < info.date.day &&
 				table.infoList[i].date.month == info.date.month &&
 				table.infoList[i].date.year == info.date.year &&
-				i < table.tableSize) {
+				i < table.infoList.size()) {
 				i++;
 			}
-			/*Сдвигаем нужную часть таблицы
-			для освобождения места для нового элемента*/
-			for (int j = table.tableSize - 1; j >= i; j--) {
-				table.infoList[j + 1] = table.infoList[j];
-			}
-			table.infoList[i] = info;
+			table.infoList.insert(table.infoList.begin() + i, info);
 		}
 	}
 	/*Запись первая - вставляем в начало таблицы*/
 	else {
-		table.infoList[table.tableSize] = info;
+		table.infoList.push_back(info);
 	}
-	table.tableSize++;
 }
 
 
@@ -318,16 +305,11 @@ size_t deleteInfo(TechInspectTable& table) {
 	cout << "Введите буквы номера: ";
 	getline(cin, l);
 	size_t deletedCounter = 0;
-	for (size_t i = 0; i < table.tableSize; i++) {
+	for (size_t i = 0; i < table.infoList.size(); i++) {
 		if (table.infoList[i].carNumber.regionCode == rC &&
 			table.infoList[i].carNumber.digits == d &&
 			table.infoList[i].carNumber.letters == l) {
-			/*Сдвиг таблицы влево, чтобы часть сдвинутой таблцы
-			перекрывала элемент, который необходимо удалить*/
-			for (size_t j = i; j < table.tableSize - 1; j++) {
-				table.infoList[j] = table.infoList[j + 1];
-			}
-			resizeDynamicTable(table, -1);
+			table.infoList.erase(table.infoList.begin() + i);
 			i--;
 			deletedCounter++;
 		}
@@ -345,25 +327,11 @@ TechInspectTable createFilteredTable(TechInspectTable& table) {
 	cout << "Введите цвет автомобиля: ";
 	getline(cin, c);
 
-	for (size_t i = 0; i < table.tableSize; i++) {
+	for (size_t i = 0; i < table.infoList.size(); i++) {
 		if (table.infoList[i].model == m &&
 			table.infoList[i].color == c) {
-			resizeDynamicTable(table, 1);
-			filteredTable.infoList[filteredTable.tableSize] = table.infoList[i];
-			filteredTable.tableSize++;
+			filteredTable.infoList.push_back(table.infoList[i]);
 		}
 	}
 	return filteredTable;
-}
-
-
-void resizeDynamicTable(TechInspectTable& table, int chaingingValue) {
-	TechInspectInfo* tempInfoList = new TechInspectInfo[table.tableSize + chaingingValue];
-	if (table.tableSize != 0) {
-		for (size_t i = 0; i < table.tableSize; i++) {
-			tempInfoList[i] = table.infoList[i];
-		}
-	}
-	table.infoList = tempInfoList;
-
 }

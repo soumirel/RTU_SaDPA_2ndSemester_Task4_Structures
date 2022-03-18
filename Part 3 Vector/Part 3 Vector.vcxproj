@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{fd9c2809-1e12-4e9e-8c9f-53cbf178aeea}</ProjectGuid>
-    <RootNamespace>Part2Dynamicarray</RootNamespace>
+    <ProjectGuid>{de8e7237-2d71-4ca5-b781-c8e217e7123c}</ProjectGuid>
+    <RootNamespace>Part3Vector</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -139,10 +139,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="part2_main.c++" />
+    <ClInclude Include="part3_Structures.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Part2_Structures.h" />
+    <ClCompile Include="part3_main.c++" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

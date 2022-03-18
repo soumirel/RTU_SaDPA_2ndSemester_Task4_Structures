@@ -1,9 +1,8 @@
 #pragma once
 #include <string>
+#include <vector>
 
 using namespace std;
-
-const size_t maxTableSize = 100;
 
 struct CarNumber {
 	string regionCode;
@@ -32,8 +31,7 @@ struct TechInspectInfo {
 };
 
 struct TechInspectTable {
-	TechInspectInfo infoList[maxTableSize] = {};
-	int tableSize = 0;
+	vector<TechInspectInfo> infoList{};
 };
 
 struct maxFieldsLen {
