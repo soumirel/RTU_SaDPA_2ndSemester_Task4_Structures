@@ -33,7 +33,7 @@ struct TechInspectInfo {
 
 struct TechInspectTable {
 	TechInspectInfo infoList[maxTableSize] = {};
-	int tableSize = 0;
+	size_t tableSize = 0;
 };
 
 struct maxFieldsLen {

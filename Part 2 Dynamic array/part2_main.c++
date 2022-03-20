@@ -364,6 +364,6 @@ void resizeDynamicTable(TechInspectTable& table, int chaingingValue) {
 			tempInfoList[i] = table.infoList[i];
 		}
 	}
+	delete[] table.infoList;
 	table.infoList = tempInfoList;
-
 }
